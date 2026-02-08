@@ -1,6 +1,6 @@
-import { AnchorProvider, Program, web3 } from '@coral-xyz/anchor';
+import { AnchorProvider, Program, web3, BN } from '@coral-xyz/anchor';
 import { AnchorWallet } from '@solana/wallet-adapter-react';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
 
@@ -62,7 +62,7 @@ export async function makeCall(
   );
 
   const tx = await program.methods
-    .makeCall(description, new web3.BN(amount * web3.LAMPORTS_PER_SOL), new web3.BN(deadline))
+    .makeCall(description, new BN(amount * LAMPORTS_PER_SOL), new BN(deadline))
     .accounts({
       call: callKeypair.publicKey,
       caller: wallet.publicKey,
@@ -90,7 +90,7 @@ export async function challengeCall(
   );
 
   const tx = await program.methods
-    .challengeCall(new web3.BN(stake * web3.LAMPORTS_PER_SOL), confidence)
+    .challengeCall(new BN(stake * LAMPORTS_PER_SOL), confidence)
     .accounts({
       call: callPubkey,
       challenger: wallet.publicKey,
