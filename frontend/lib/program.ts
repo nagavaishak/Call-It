@@ -2,7 +2,13 @@ import { AnchorProvider, Program, web3, BN } from '@coral-xyz/anchor';
 import { AnchorWallet } from '@solana/wallet-adapter-react';
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
-const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
+function getProgramId(): PublicKey {
+  const programIdString = process.env.NEXT_PUBLIC_PROGRAM_ID;
+  if (!programIdString) {
+    throw new Error('NEXT_PUBLIC_PROGRAM_ID not configured');
+  }
+  return new PublicKey(programIdString);
+}
 
 // Simplified IDL - only what we need for the frontend
 const IDL = {
@@ -41,7 +47,7 @@ const IDL = {
 
 export function getProgram(connection: Connection, wallet: AnchorWallet) {
   const provider = new AnchorProvider(connection, wallet, {});
-  return new Program(IDL as any, PROGRAM_ID, provider);
+  return new Program(IDL as any, getProgramId(), provider);
 }
 
 export async function makeCall(
@@ -58,7 +64,7 @@ export async function makeCall(
 
   const [escrow] = PublicKey.findProgramAddressSync(
     [Buffer.from('escrow'), callKeypair.publicKey.toBuffer()],
-    PROGRAM_ID
+    getProgramId()
   );
 
   const tx = await program.methods
@@ -86,7 +92,7 @@ export async function challengeCall(
 
   const [escrow] = PublicKey.findProgramAddressSync(
     [Buffer.from('escrow'), callPubkey.toBuffer()],
-    PROGRAM_ID
+    getProgramId()
   );
 
   const tx = await program.methods
