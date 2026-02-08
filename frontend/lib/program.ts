@@ -3,11 +3,8 @@ import { AnchorWallet } from '@solana/wallet-adapter-react';
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 function getProgramId(): PublicKey {
-  const programIdString = process.env.NEXT_PUBLIC_PROGRAM_ID;
-  if (!programIdString) {
-    throw new Error('NEXT_PUBLIC_PROGRAM_ID not configured');
-  }
-  return new PublicKey(programIdString);
+  // Hardcoded for now to avoid env variable caching issues
+  return new PublicKey('3Uo8DRnQTPhf9DtfchoBBbFHn8jXKov347RpTqBp4G3A');
 }
 
 // Simplified IDL - only what we need for the frontend
@@ -47,7 +44,8 @@ const IDL = {
 
 export function getProgram(connection: Connection, wallet: AnchorWallet) {
   const provider = new AnchorProvider(connection, wallet, {});
-  return new Program(IDL as any, getProgramId(), provider);
+  // Pass as string, let Anchor convert it
+  return new Program(IDL as any, '3Uo8DRnQTPhf9DtfchoBBbFHn8jXKov347RpTqBp4G3A', provider);
 }
 
 export async function makeCall(
