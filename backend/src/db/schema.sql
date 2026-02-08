@@ -4,48 +4,37 @@
 CREATE TABLE IF NOT EXISTS users (
   wallet_address TEXT PRIMARY KEY,
   callit_score DECIMAL(10, 2) DEFAULT 0,
-  tier INTEGER DEFAULT 1,
+  tier TEXT DEFAULT 'Bronze',
   total_calls INTEGER DEFAULT 0,
   won_calls INTEGER DEFAULT 0,
-  lost_calls INTEGER DEFAULT 0,
-  total_challenged INTEGER DEFAULT 0,
-  won_challenges INTEGER DEFAULT 0,
-  lost_challenges INTEGER DEFAULT 0,
   current_streak INTEGER DEFAULT 0,
-  created_at BIGINT NOT NULL,
-  updated_at BIGINT NOT NULL
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
+  updated_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
 -- Calls table
 CREATE TABLE IF NOT EXISTS calls (
   id TEXT PRIMARY KEY,
-  onchain_id TEXT UNIQUE NOT NULL,
-  caller TEXT NOT NULL REFERENCES users(wallet_address),
-  caller_address TEXT NOT NULL,
-  claim TEXT NOT NULL,
-  category TEXT NOT NULL CHECK (category IN ('TokenPrice', 'RugPrediction')),
-  token_address TEXT,
-  target_price DECIMAL(20, 8),
-  creation_price DECIMAL(20, 8),
-  stake BIGINT NOT NULL,
-  confidence INTEGER NOT NULL,
+  onchain_id TEXT UNIQUE,
+  caller TEXT NOT NULL,
+  description TEXT NOT NULL,
+  amount TEXT NOT NULL,
   deadline BIGINT NOT NULL,
-  created_at BIGINT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'Active' CHECK (status IN ('Active', 'ResolvedCallerWins', 'ResolvedCallerLoses', 'AutoRefunded')),
-  challengers_count INTEGER DEFAULT 0,
-  resolved_at BIGINT
+  status TEXT NOT NULL DEFAULT 'Active',
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
+  resolved_at BIGINT,
+  total_challengers INTEGER DEFAULT 0,
+  total_stake TEXT DEFAULT '0'
 );
 
 -- Challenges table
 CREATE TABLE IF NOT EXISTS challenges (
   id TEXT PRIMARY KEY,
-  onchain_id TEXT UNIQUE NOT NULL,
   call_id TEXT NOT NULL REFERENCES calls(id),
-  challenger TEXT NOT NULL REFERENCES users(wallet_address),
-  challenger_address TEXT NOT NULL,
-  stake BIGINT NOT NULL,
+  challenger TEXT NOT NULL,
+  stake TEXT NOT NULL,
   confidence INTEGER NOT NULL,
-  created_at BIGINT NOT NULL
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
 -- Events table (for indexer)
