@@ -4,6 +4,29 @@ import { getDatabase } from '../db/database.js';
 const router = express.Router();
 
 /**
+ * GET /api/users/leaderboard - Get top users by score
+ */
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const { limit = 50 } = req.query;
+
+    const result = await getDatabase().query(
+      `SELECT wallet_address, callit_score, tier, total_calls, won_calls,
+              current_streak
+       FROM users
+       WHERE total_calls > 0
+       ORDER BY callit_score DESC LIMIT $1`,
+      [Number(limit)]
+    );
+
+    res.json({ leaderboard: result.rows });
+  } catch (error: any) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * GET /api/users/:wallet - Get user profile
  */
 router.get('/:wallet', async (req, res) => {
@@ -64,29 +87,6 @@ router.get('/:wallet/challenges', async (req, res) => {
     res.json({ challenges: result.rows });
   } catch (error: any) {
     console.error('Error fetching user challenges:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/**
- * GET /api/leaderboard - Get top users by score
- */
-router.get('/leaderboard', async (req, res) => {
-  try {
-    const { limit = 50 } = req.query;
-
-    const result = await getDatabase().query(
-      `SELECT wallet_address, callit_score, tier, total_calls, won_calls,
-              current_streak
-       FROM users
-       WHERE total_calls > 0
-       ORDER BY callit_score DESC LIMIT $1`,
-      [Number(limit)]
-    );
-
-    res.json({ leaderboard: result.rows });
-  } catch (error: any) {
-    console.error('Error fetching leaderboard:', error);
     res.status(500).json({ error: error.message });
   }
 });
