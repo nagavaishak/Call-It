@@ -2,7 +2,6 @@ import express from 'express';
 import { getDatabase } from '../db/database.js';
 
 const router = express.Router();
-const db = getDatabase();
 
 /**
  * GET /api/calls - Get all calls (with pagination)
@@ -22,7 +21,7 @@ router.get('/', async (req, res) => {
     query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
     params.push(Number(limit), Number(offset));
 
-    const result = await db.query(query, params);
+    const result = await getDatabase().query(query, params);
 
     res.json({
       calls: result.rows,
@@ -43,7 +42,7 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await db.query(
+    const result = await getDatabase().query(
       'SELECT * FROM calls WHERE id = $1 OR onchain_id = $1',
       [id]
     );
@@ -66,7 +65,7 @@ router.get('/:id/challenges', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await db.query(
+    const result = await getDatabase().query(
       'SELECT * FROM challenges WHERE call_id = $1 ORDER BY created_at ASC',
       [id]
     );
@@ -100,7 +99,7 @@ router.post('/', async (req, res) => {
     const created_at = Math.floor(Date.now() / 1000);
 
     // Upsert user
-    await db.query(
+    await getDatabase().query(
       `INSERT INTO users (wallet_address, created_at, updated_at)
        VALUES ($1, $2, $2)
        ON CONFLICT (wallet_address) DO UPDATE SET updated_at = $2`,
@@ -108,7 +107,7 @@ router.post('/', async (req, res) => {
     );
 
     // Insert call
-    await db.query(
+    await getDatabase().query(
       `INSERT INTO calls (
         id, onchain_id, caller, caller_address, claim, category,
         token_address, target_price, creation_price, stake, confidence,
@@ -123,7 +122,7 @@ router.post('/', async (req, res) => {
     );
 
     // Update user stats
-    await db.query(
+    await getDatabase().query(
       `UPDATE users SET total_calls = total_calls + 1 WHERE wallet_address = $1`,
       [caller_address]
     );

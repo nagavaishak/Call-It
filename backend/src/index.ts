@@ -1,12 +1,12 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import * as dotenv from 'dotenv';
 import { getDatabase } from './db/database.js';
 import callsRouter from './routes/calls.js';
 import oracleRouter from './routes/oracle.js';
 import usersRouter from './routes/users.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -36,9 +36,10 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Start server
 async function start() {
   try {
-    // Initialize database
-    const db = getDatabase();
-    await db.initialize();
+    // Initialize database (schema should be run manually in Supabase SQL Editor)
+    // Uncomment below to auto-initialize schema:
+    // const db = getDatabase();
+    // await db.initialize();
 
     // Start server
     app.listen(PORT, () => {

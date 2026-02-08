@@ -2,7 +2,6 @@ import express from 'express';
 import { getDatabase } from '../db/database.js';
 
 const router = express.Router();
-const db = getDatabase();
 
 /**
  * GET /api/oracle/pending-calls - Get calls ready for resolution
@@ -12,7 +11,7 @@ router.get('/pending-calls', async (req, res) => {
   try {
     const now = Math.floor(Date.now() / 1000);
 
-    const result = await db.query(
+    const result = await getDatabase().query(
       `SELECT * FROM calls
        WHERE status = 'Active'
        AND deadline <= $1
@@ -37,7 +36,7 @@ router.post('/resolve', async (req, res) => {
     const status = outcome === 'CallerWins' ? 'ResolvedCallerWins' : 'ResolvedCallerLoses';
     const resolved_at = Math.floor(Date.now() / 1000);
 
-    await db.query(
+    await getDatabase().query(
       `UPDATE calls SET status = $1, resolved_at = $2 WHERE id = $3 OR onchain_id = $3`,
       [status, resolved_at, call_id]
     );

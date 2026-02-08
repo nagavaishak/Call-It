@@ -2,7 +2,6 @@ import express from 'express';
 import { getDatabase } from '../db/database.js';
 
 const router = express.Router();
-const db = getDatabase();
 
 /**
  * GET /api/users/:wallet - Get user profile
@@ -11,7 +10,7 @@ router.get('/:wallet', async (req, res) => {
   try {
     const { wallet } = req.params;
 
-    const result = await db.query(
+    const result = await getDatabase().query(
       'SELECT * FROM users WHERE wallet_address = $1',
       [wallet]
     );
@@ -35,7 +34,7 @@ router.get('/:wallet/calls', async (req, res) => {
     const { wallet } = req.params;
     const { limit = 20, offset = 0 } = req.query;
 
-    const result = await db.query(
+    const result = await getDatabase().query(
       `SELECT * FROM calls WHERE caller = $1
        ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
       [wallet, Number(limit), Number(offset)]
@@ -56,7 +55,7 @@ router.get('/:wallet/challenges', async (req, res) => {
     const { wallet } = req.params;
     const { limit = 20, offset = 0 } = req.query;
 
-    const result = await db.query(
+    const result = await getDatabase().query(
       `SELECT * FROM challenges WHERE challenger = $1
        ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
       [wallet, Number(limit), Number(offset)]
@@ -76,7 +75,7 @@ router.get('/leaderboard', async (req, res) => {
   try {
     const { limit = 50 } = req.query;
 
-    const result = await db.query(
+    const result = await getDatabase().query(
       `SELECT wallet_address, callit_score, tier, total_calls, won_calls,
               current_streak
        FROM users
