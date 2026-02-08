@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.*
+oracle-node-*.json
+oracle-public-keys.json
+*.log
+.DS_Store
